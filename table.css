@@ -1,0 +1,16 @@
+.players {
+    border-collapse: collapse;
+}
+
+.players td {
+    border: 1px dotted;
+}
+
+.players td:first-of-type {
+    text-align: right;
+}
+
+.players input {
+    box-sizing: border-box;
+    width: 100%;
+}
