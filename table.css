@@ -14,3 +14,18 @@
     box-sizing: border-box;
     width: 100%;
 }
+
+.save {
+    background: green;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: block;
+    font-size: 1em;
+    margin: .4em auto 0 auto;
+    padding: .4em 1em;
+}
+
+.save:active {
+    color: lightgreen;
+}

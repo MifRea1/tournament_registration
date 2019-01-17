@@ -41,8 +41,6 @@ const keyboardHandler = event => {
         tableContent.removeChild(row);
         Array.from(tableContent.querySelectorAll('tr:not(:first-of-type) > td:first-of-type'))
             .forEach((cell, index) => cell.textContent = index + 1);
-    } else {
-        console.log(event);
     }
 };
 const addRow = () => {
@@ -65,6 +63,38 @@ const addRow = () => {
     tableContent.appendChild(row);
 };
 
-for (let i = 1; i <= 10; ++i) {
-    addRow();
-}
+fetch('http://localhost/saved.json')
+    .then(response => {
+        if (response.statusText === 'OK') {
+            return response.json();
+        }
+        for (let i = 1; i <= 10; ++i) {
+            addRow();
+        }
+    })
+    .then(json => {
+        if (!json) {
+            return;
+        }
+        const saved = Object.entries(json);
+        const savedLinesCount = saved[0][1].length;
+        for (let i = 1; i <= savedLinesCount; ++i) {
+            addRow();
+        }
+        const inputs = tableContent.querySelectorAll('input');
+        saved.forEach((line, index) => {
+            for (let i = 0; i < line[1].length; ++i) {
+                inputs[i * saved.length + index].value = line[1][i];
+            }
+        })
+    });
+
+const submitHandler = event => {
+    event.preventDefault();
+    const data = new FormData(event.target);
+    fetch('http://localhost', {
+        body: data,
+        method: 'POST'
+    });
+};
+document.querySelector('form').addEventListener('submit', submitHandler);
