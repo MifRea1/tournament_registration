@@ -83,7 +83,7 @@ fetch('http://localhost/saved.json')
         }
         const inputs = tableContent.querySelectorAll('input');
         saved.forEach((line, index) => {
-            for (let i = 0; i < line[1].length; ++i) {
+            for (let i = 0; i < savedLinesCount; ++i) {
                 inputs[i * saved.length + index].value = line[1][i];
             }
         })
