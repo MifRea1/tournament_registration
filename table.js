@@ -1,12 +1,14 @@
+(() => {
 const inputNames = [
     'last_name',
     'first_name',
-    'middle_name',
     'birth_day',
     'birth_month',
     'birth_year',
     'residence',
-    'rating'
+    'rating',
+    'title',
+    'id_fide'
 ];
 const columnsCount = inputNames.length + 1;
 const tableContent = document.querySelector('.players tbody');
@@ -17,6 +19,9 @@ const keyboardHandler = event => {
     const cell = target.parentNode;
     const row = cell.parentNode;
     const nextRow = row.nextSibling;
+    if (['ArrowUp', 'ArrowDown'].includes(code)) {
+        event.preventDefault();
+    }
     if (code === 'ArrowUp' && row.previousSibling.childNodes.length) {
         row.previousSibling.querySelector('input[name="' + targetName + '"').focus();
     } else if (code === 'ArrowDown' && nextRow) {
@@ -43,6 +48,50 @@ const keyboardHandler = event => {
             .forEach((cell, index) => cell.textContent = index + 1);
     }
 };
+let currentRow;
+const autocompleteClickHandler = event => {
+    const selectedRow = event.target.parentNode;
+    const selectedValues = Array.from(selectedRow.querySelectorAll('td')).map(td => td.innerText);
+    currentRow.querySelectorAll('input').forEach((input, index) => input.value = selectedValues[index]);
+    document.getElementById('autocomplete').remove();
+    if (!currentRow.nextSibling) {
+        addRow();
+    }
+    currentRow.nextSibling.querySelector('input').focus();
+};
+const autocompleteHandler = event => {
+    const oldAutocomplete = document.getElementById('autocomplete');
+    if (oldAutocomplete) {
+        oldAutocomplete.remove();
+    }
+    const target = event.target;
+    const value = target.value;
+    if (value.length === 0) {
+        return;
+    }
+    const players = localRating.filter(player => player[0].startsWith(value));
+    if (players.length === 0) {
+        return;
+    }
+    const autocomplete = document.createElement('table');
+    autocomplete.id = 'autocomplete';
+    players.forEach(player => {
+        const tr = document.createElement('tr');
+        player.forEach(field => {
+            const td = document.createElement('td');
+            td.innerText = field;
+            tr.appendChild(td);
+        });
+        tr.addEventListener('click', autocompleteClickHandler);
+        autocomplete.appendChild(tr);
+    });
+    currentRow = target.parentNode.parentNode;
+    autocomplete.style.top = currentRow.parentNode.parentNode.offsetTop + currentRow.offsetTop + currentRow.offsetHeight + 'px';
+    autocomplete.style.marginLeft = target.parentNode.offsetLeft + 'px';
+    autocomplete.style.width = currentRow.offsetWidth - target.parentNode.offsetLeft + 'px';
+    document.querySelector('body').appendChild(autocomplete);
+};
+const currentYear = new Date().getFullYear();
 const addRow = () => {
     const row = document.createElement('tr');
     for (let columnIndex = 1; columnIndex <= columnsCount; ++columnIndex) {
@@ -53,9 +102,33 @@ const addRow = () => {
         }
         if (columnIndex > 1) {
             const input = document.createElement('input');
-            input.name = inputNames[columnIndex - 2] + '[]';
-            input.type = 'text';
+            const name = inputNames[columnIndex - 2];
+            input.name = name + '[]';
+            if (['birth_day', 'birth_month', 'birth_year', 'rating', 'id_fide'].includes(name)) {
+                input.type = 'number';
+                input.autocomplete = 'off';
+                input.min = 0;
+                if (name === 'birth_day') {
+                    input.max = 31;
+                } else if (name === 'birth_month') {
+                    input.max = 12;
+                } else if (name === 'birth_year') {
+                    input.max = currentYear;
+                    input.min = currentYear - 200;
+                } else if (name === 'rating') {
+                    input.max = 4000;
+                } else if (name === 'id_fide') {
+                    input.max = 99999999;
+                }
+            } else {
+                input.type = 'text';
+                input.maxLength = 26;
+            }
             input.addEventListener('keydown', keyboardHandler);
+            if (name === 'last_name') {
+                input.autocomplete = 'off';
+                input.addEventListener('input', autocompleteHandler);
+            }
             cell.appendChild(input);
         }
         row.appendChild(cell);
@@ -72,22 +145,36 @@ fetch('http://localhost/saved.json')
             addRow();
         }
     })
-    .then(json => {
-        if (!json) {
+    .then(saved => {
+        if (!saved) {
             return;
         }
-        const saved = Object.entries(json);
-        const savedLinesCount = saved[0][1].length;
+        const names = inputNames.filter(name => saved.hasOwnProperty(name));
+        const savedLinesCount = saved[names[0]].length;
         for (let i = 1; i <= savedLinesCount; ++i) {
             addRow();
         }
-        const inputs = tableContent.querySelectorAll('input');
-        saved.forEach((line, index) => {
-            for (let i = 0; i < savedLinesCount; ++i) {
-                inputs[i * saved.length + index].value = line[1][i];
-            }
-        })
+        names.forEach(
+            name => tableContent.querySelectorAll('input[name="' + name + '[]"]').forEach(
+                (node, index) => {
+                    if (saved.hasOwnProperty(name)) {
+                        node.value = saved[name][index];
+                    }
+                }
+            )
+        );
     });
+
+let localRating = [];
+fetch('http://localhost/local_rating.json').then(response => {
+    if (response.statusText === 'OK') {
+        return response.json();
+    }
+}).then(ratingList => {
+    if (ratingList) {
+        localRating = ratingList;
+    }
+});
 
 const submitHandler = event => {
     event.preventDefault();
@@ -98,3 +185,4 @@ const submitHandler = event => {
     });
 };
 document.querySelector('form').addEventListener('submit', submitHandler);
+})();

@@ -29,3 +29,19 @@
 .save:active {
     color: lightgreen;
 }
+
+#autocomplete {
+    background: white;
+    border-collapse: collapse;
+    position: absolute;
+}
+
+#autocomplete tr {
+    border: 1px solid green;
+}
+
+#autocomplete tr:hover {
+    background: green;
+    color: white;
+    cursor: pointer;
+}

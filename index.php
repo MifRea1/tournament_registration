@@ -23,9 +23,7 @@ for ($i = 0; $i < $count; ++$i) {
         . mb_convert_encoding($data->first_name[$i], 'CP1251', 'UTF8'),
         0, 27
     );
-    $title = '';
     $country = 'RUS';
-    $id = '';
     $score = '';
     $color = 'W';
     $line = sprintf('%-4s%-4s%-27s%-6s%-5s%-4s%8s%3s%3s %s',
@@ -33,9 +31,9 @@ for ($i = 0; $i < $count; ++$i) {
         $i + 1,
         $name,
         $data->rating[$i] !== '' ? $data->rating[$i] : '0',
-        $title,
+        $data->title[$i],
         $country,
-        $id,
+        $data->id_fide[$i],
         $score,
         $color,
         str_repeat(' v  -1--   ', $rounds)
@@ -58,7 +56,7 @@ fputs($tournamentFile, '$' . PHP_EOL);
 fputs($tournamentFile, '$' . PHP_EOL);
 fputs($tournamentFile, '$Additional player data for Swiss Master for Windows -- do not remove this line' . PHP_EOL);
 for ($i = 0; $i < $count; ++$i) {
-    $line = sprintf('M %2s-%2s-%4s "" ""',
+    $line = sprintf('M %02s-%02s-%4s "" ""',
         $data->birth_day[$i] !== '' ? $data->birth_day[$i] : '..',
         $data->birth_month[$i] !== '' ? $data->birth_month[$i] : '..',
         $data->birth_year[$i] !== '' ? $data->birth_year[$i] : '....'
