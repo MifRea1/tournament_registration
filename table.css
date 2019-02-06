@@ -40,7 +40,8 @@
     border: 1px solid green;
 }
 
-#autocomplete tr:hover {
+#autocomplete tr:hover,
+#autocomplete tr.selected {
     background: green;
     color: white;
     cursor: pointer;

@@ -19,8 +19,11 @@ const keyboardHandler = event => {
     const cell = target.parentNode;
     const row = cell.parentNode;
     const nextRow = row.nextSibling;
-    if (['ArrowUp', 'ArrowDown'].includes(code)) {
+    if (['ArrowUp', 'ArrowDown'].includes(code) || code.includes('Enter')) {
         event.preventDefault();
+        if (document.getElementById('autocomplete')) {
+            return autocompleteSelect(code);
+        }
     }
     if (code === 'ArrowUp' && row.previousSibling.childNodes.length) {
         row.previousSibling.querySelector('input[name="' + targetName + '"').focus();
@@ -46,24 +49,61 @@ const keyboardHandler = event => {
         tableContent.removeChild(row);
         Array.from(tableContent.querySelectorAll('tr:not(:first-of-type) > td:first-of-type'))
             .forEach((cell, index) => cell.textContent = index + 1);
+    } else if (code === 'Escape') {
+        removeAutocomplete();
+    }
+};
+const autocompleteSelect = code => {
+    const autocomplete = document.getElementById('autocomplete');
+    if (!autocomplete) {
+        return;
+    }
+    const selected = autocomplete.querySelector('.selected');
+    if (selected) {
+        if (code.includes('Enter')) {
+            return selected.firstChild.click();
+        }
+        selected.className = '';
+        if (code === 'ArrowDown') {
+            if (selected.nextSibling) {
+                selected.nextSibling.className = 'selected';
+            } else {
+                autocomplete.firstChild.className = 'selected';
+            }
+        } else if (code === 'ArrowUp') {
+            if (selected.previousSibling) {
+                selected.previousSibling.className = 'selected';
+            } else {
+                autocomplete.lastChild.className = 'selected';
+            }
+        }
+    } else {
+        if (code === 'ArrowDown') {
+            autocomplete.firstChild.className = 'selected';
+        } else if (code === 'ArrowUp') {
+            autocomplete.lastChild.className = 'selected';
+        }
     }
 };
 let currentRow;
+const removeAutocomplete = () => {
+    const autocomplete = document.getElementById('autocomplete');
+    if (autocomplete) {
+        autocomplete.remove();
+    }
+};
 const autocompleteClickHandler = event => {
     const selectedRow = event.target.parentNode;
     const selectedValues = Array.from(selectedRow.querySelectorAll('td')).map(td => td.innerText);
     currentRow.querySelectorAll('input').forEach((input, index) => input.value = selectedValues[index]);
-    document.getElementById('autocomplete').remove();
+    removeAutocomplete();
     if (!currentRow.nextSibling) {
         addRow();
     }
     currentRow.nextSibling.querySelector('input').focus();
 };
 const autocompleteHandler = event => {
-    const oldAutocomplete = document.getElementById('autocomplete');
-    if (oldAutocomplete) {
-        oldAutocomplete.remove();
-    }
+    removeAutocomplete();
     const target = event.target;
     const value = target.value;
     if (value.length === 0) {
