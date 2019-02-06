@@ -84,6 +84,7 @@ const autocompleteSelect = code => {
             autocomplete.lastChild.className = 'selected';
         }
     }
+    autocomplete.querySelector('.selected').scrollIntoViewIfNeeded();
 };
 let currentRow;
 const removeAutocomplete = () => {
@@ -131,13 +132,18 @@ const autocompleteHandler = event => {
     autocomplete.style.width = currentRow.offsetWidth - target.parentNode.offsetLeft + 'px';
     document.querySelector('body').appendChild(autocomplete);
 };
+const defaultPlayersCount = 10;
+const maxPlayersCount = 300;
 const currentYear = new Date().getFullYear();
 const addRow = () => {
+    const rowsCount = tableContent.querySelectorAll('tr').length;
+    if (rowsCount > maxPlayersCount) {
+        return;
+    }
     const row = document.createElement('tr');
     for (let columnIndex = 1; columnIndex <= columnsCount; ++columnIndex) {
         const cell = document.createElement('td');
         if (columnIndex === 1) {
-            const rowsCount = tableContent.querySelectorAll('tr').length;
             cell.textContent = rowsCount;
         }
         if (columnIndex > 1) {
@@ -181,7 +187,7 @@ fetch('http://localhost/saved.json')
         if (response.statusText === 'OK') {
             return response.json();
         }
-        for (let i = 1; i <= 10; ++i) {
+        for (let i = 1; i <= defaultPlayersCount; ++i) {
             addRow();
         }
     })
@@ -225,4 +231,14 @@ const submitHandler = event => {
     });
 };
 document.querySelector('form').addEventListener('submit', submitHandler);
+const cleanHandler = event => {
+    event.preventDefault();
+    while (tableContent.childElementCount > 1) {
+        tableContent.lastElementChild.remove();
+    }
+    for (let i = 1; i <= defaultPlayersCount; ++i) {
+        addRow();
+    }
+};
+document.querySelector('.clean').addEventListener('click', cleanHandler);
 })();
