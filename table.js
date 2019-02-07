@@ -98,8 +98,15 @@ const englishLetters = new RegExp('^[a-z]+', 'i');
 const autocompleteClickHandler = event => {
     const selectedRow = event.target.parentNode;
     let selectedValues = Array.from(selectedRow.querySelectorAll('td')).map(td => td.innerText);
+    const ids = Array.from(document.querySelectorAll('.players td:last-child input')).map(input => input.value);
+    ids.splice(currentRow.firstChild.innerText - 1);
+    const id = selectedValues[8];
+    const index = ids.lastIndexOf(id) + 1;
+    if (index) {
+        return alert('Этот игрок уже есть в списке под номером ' + index + '.');
+    }
     if (englishLetters.test(selectedValues[0])) {
-        const localPlayer = localRating.find(player => player[8] === Number(selectedValues[8]));
+        const localPlayer = localRating.find(player => player[8] === Number(id));
         if (localPlayer) {
             selectedValues = localPlayer;
         }
