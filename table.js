@@ -39,6 +39,7 @@ const keyboardHandler = event => {
     } else if (code === 'Insert') {
         addRow();
     } else if (code === 'Delete' && Array.from(row.querySelectorAll('input')).filter(input => input.value !== '').length === 0) {
+        event.preventDefault();
         if (nextRow) {
             nextRow.firstChild.nextSibling.firstChild.focus();
         } else if (row.previousSibling.childNodes.length) {
