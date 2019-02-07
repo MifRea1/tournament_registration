@@ -11,9 +11,17 @@
     text-align: right;
 }
 
+.players td.centered {
+    text-align: center;
+}
+
 .players input {
     box-sizing: border-box;
     width: 100%;
+}
+
+.players input[type="number"] {
+    text-align: right;
 }
 
 .buttons {

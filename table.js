@@ -93,9 +93,16 @@ const removeAutocomplete = () => {
         autocomplete.remove();
     }
 };
+const englishLetters = new RegExp('^[a-z]+', 'i');
 const autocompleteClickHandler = event => {
     const selectedRow = event.target.parentNode;
-    const selectedValues = Array.from(selectedRow.querySelectorAll('td')).map(td => td.innerText);
+    let selectedValues = Array.from(selectedRow.querySelectorAll('td')).map(td => td.innerText);
+    if (englishLetters.test(selectedValues[0])) {
+        const localPlayer = localRating.find(player => player[8] === Number(selectedValues[8]));
+        if (localPlayer) {
+            selectedValues = localPlayer;
+        }
+    }
     currentRow.querySelectorAll('input').forEach((input, index) => input.value = selectedValues[index]);
     removeAutocomplete();
     if (!currentRow.nextSibling) {
@@ -106,11 +113,12 @@ const autocompleteClickHandler = event => {
 const autocompleteHandler = event => {
     removeAutocomplete();
     const target = event.target;
-    const value = target.value;
-    if (value.length === 0) {
+    if (target.value.length === 0) {
         return;
     }
-    const players = localRating.filter(player => player[0].startsWith(value));
+    const value = target.value[0].toUpperCase() + target.value.slice(1).toLowerCase();
+    const ratingList = englishLetters.test(value) ? rating : localRating;
+    const players = ratingList.filter(player => player[0].startsWith(value)).slice(0, 20 + value.length ** 4);
     if (players.length === 0) {
         return;
     }
@@ -218,7 +226,7 @@ fetch('http://localhost/local_rating.json')
         if (response.ok) {
             return response.json();
         } else if (response.status === 404) {
-            alert('Рейтинг-лист не найден, автодополнение недоступно.');
+            alert('Областной рейтинг-лист не найден.');
         }
     })
     .then(ratingList => {
@@ -227,6 +235,24 @@ fetch('http://localhost/local_rating.json')
         }
     })
     .catch(() => alert('Не удалось загрузить рейтинг-лист с сервера.'));
+let rating = [];
+fetch('http://localhost/rating.csv')
+    .then(response => {
+        if (response.ok) {
+            return response.text();
+        } else if (response.status === 404) {
+            alert('Российский рейтинг-лист не найден.')
+        }
+    })
+    .then(csv => {
+        if (csv) {
+            rating = csv.split('\r\n').map(line => {
+                const values = line.split(';'); // id name title rating year flags
+                const title = values[2] !== '' ? values[2].toUpperCase().replace('M', 'I') + 'M' : '';
+                return values[1].split(', ').concat('', '', values[4], '', values[3], title, values[0]);
+            });
+        }
+    });
 
 const submitHandler = event => {
     event.preventDefault();
