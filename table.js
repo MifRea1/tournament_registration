@@ -184,7 +184,7 @@ const addRow = () => {
 
 fetch('http://localhost/saved.json')
     .then(response => {
-        if (response.statusText === 'OK') {
+        if (response.ok) {
             return response.json();
         }
         for (let i = 1; i <= defaultPlayersCount; ++i) {
@@ -209,18 +209,24 @@ fetch('http://localhost/saved.json')
                 }
             )
         );
-    });
+    })
+    .catch(() => alert('Не удалось загрузить сохранённые данные с сервера.'));
 
 let localRating = [];
-fetch('http://localhost/local_rating.json').then(response => {
-    if (response.statusText === 'OK') {
-        return response.json();
-    }
-}).then(ratingList => {
-    if (ratingList) {
-        localRating = ratingList;
-    }
-});
+fetch('http://localhost/local_rating.json')
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else if (response.status === 404) {
+            alert('Рейтинг-лист не найден, автодополнение недоступно.');
+        }
+    })
+    .then(ratingList => {
+        if (ratingList) {
+            localRating = ratingList;
+        }
+    })
+    .catch(() => alert('Не удалось загрузить рейтинг-лист с сервера.'));
 
 const submitHandler = event => {
     event.preventDefault();
@@ -228,7 +234,9 @@ const submitHandler = event => {
     fetch('http://localhost', {
         body: data,
         method: 'POST'
-    });
+    })
+    .then(response => response.text())
+    .then(text => alert(text));
 };
 document.querySelector('form').addEventListener('submit', submitHandler);
 const cleanHandler = event => {

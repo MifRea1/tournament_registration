@@ -6,6 +6,7 @@ const COUNTRY = 'RUS';
 
 if ($_POST) {
     file_put_contents('saved.json', json_encode($_POST));
+    echo 'Данные сохранены на сервере.';
 } else {
     return header('Location: table.html');
 }
