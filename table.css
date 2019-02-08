@@ -5,6 +5,8 @@
 
 .players td {
     border: 1px dotted;
+    font: bold .8rem sans-serif;
+    padding: 0 .15rem;
 }
 
 .players td:first-of-type {
@@ -16,7 +18,9 @@
 }
 
 .players input {
+    border: none;
     box-sizing: border-box;
+    font: .8rem sans-serif;
     width: 100%;
 }
 
@@ -26,7 +30,7 @@
 
 .buttons {
     display: flex;
-    margin: .5em 0;
+    margin: .5rem 0;
 }
 
 .save,
@@ -35,9 +39,9 @@
     color: white;
     cursor: pointer;
     flex: 1;
-    font-size: 1em;
+    font: 1rem sans-serif;
     margin: 0 10%;
-    padding: .4em 1em;
+    padding: .5rem;
 }
 
 .save:hover,
@@ -61,10 +65,35 @@
     color: red;
 }
 
+.message-board {
+    background: white;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 33%;
+}
+
+.message {
+    background: blue;
+    color: white;
+    cursor: pointer;
+    font: 1rem sans-serif;
+    margin-bottom: .1rem;
+    padding: .5rem 2rem;
+}
+
+.message.error {
+    background: darkred;
+}
+
+.message.success {
+    background: green;
+}
+
 #autocomplete {
     background: white;
     border-collapse: collapse;
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
     position: absolute;
 }
 

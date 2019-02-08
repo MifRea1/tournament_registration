@@ -94,6 +94,15 @@ const removeAutocomplete = () => {
         autocomplete.remove();
     }
 };
+const messageBoard = document.querySelector('.message-board');
+const displayMessage = (message, type = '') => {
+    const messageBox = document.createElement('div');
+    messageBox.innerText = message;
+    messageBox.className = ('message ' + type).trimRight();
+    messageBox.addEventListener('click', event => event.target.remove());
+    messageBoard.appendChild(messageBox);
+    setTimeout(() => messageBox.remove(), 5000);
+};
 const englishLetters = new RegExp('^[a-z]+', 'i');
 const autocompleteClickHandler = event => {
     const selectedRow = event.target.parentNode;
@@ -103,7 +112,7 @@ const autocompleteClickHandler = event => {
     const id = selectedValues[8];
     const index = ids.lastIndexOf(id) + 1;
     if (index) {
-        return alert('Этот игрок уже есть в списке под номером ' + index + '.');
+        return displayMessage('Этот игрок уже есть в списке под номером ' + index + '.');
     }
     if (englishLetters.test(selectedValues[0])) {
         const localPlayer = localRating.find(player => player[8] === Number(id));
@@ -226,7 +235,7 @@ fetch('http://localhost/saved.json')
             )
         );
     })
-    .catch(() => alert('Не удалось загрузить сохранённые данные с сервера.'));
+    .catch(() => displayMessage('Не удалось загрузить сохранённые данные с сервера.', 'error'));
 
 let localRating = [];
 fetch('http://localhost/local_rating.json')
@@ -234,22 +243,23 @@ fetch('http://localhost/local_rating.json')
         if (response.ok) {
             return response.json();
         } else if (response.status === 404) {
-            alert('Областной рейтинг-лист не найден.');
+            displayMessage('Областной рейтинг-лист не найден.', 'error');
         }
     })
     .then(ratingList => {
         if (ratingList) {
             localRating = ratingList;
+            displayMessage('Загружен областной рейтинг-лист.', 'success');
         }
     })
-    .catch(() => alert('Не удалось загрузить рейтинг-лист с сервера.'));
+    .catch(() => displayMessage('Не удалось загрузить рейтинг-лист с сервера.', 'error'));
 let rating = [];
 fetch('http://localhost/rating.csv')
     .then(response => {
         if (response.ok) {
             return response.text();
         } else if (response.status === 404) {
-            alert('Российский рейтинг-лист не найден.')
+            displayMessage('Российский рейтинг-лист не найден.', 'error')
         }
     })
     .then(csv => {
@@ -259,6 +269,7 @@ fetch('http://localhost/rating.csv')
                 const title = values[2] !== '' ? values[2].toUpperCase().replace('M', 'I') + 'M' : '';
                 return values[1].split(', ').concat('', '', values[4], '', values[3], title, values[0]);
             });
+            displayMessage('Загружен российский рейтинг-лист.', 'success');
         }
     });
 
@@ -270,7 +281,8 @@ const submitHandler = event => {
         method: 'POST'
     })
     .then(response => response.text())
-    .then(text => alert(text));
+    .then(text => displayMessage(text, 'success'))
+    .catch(() => displayMessage('Сохранение невозможно, сервер недоступен.', 'error'));
 };
 document.querySelector('form').addEventListener('submit', submitHandler);
 const cleanHandler = event => {
