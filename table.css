@@ -3,13 +3,17 @@
     width: 100%;
 }
 
+.players tr:first-child > td:not(:first-child) {
+    cursor: pointer;
+}
+
 .players td {
     border: 1px dotted;
     font: bold .8rem sans-serif;
     padding: 0 .15rem;
 }
 
-.players td:first-of-type {
+.players td:first-child {
     text-align: right;
 }
 
@@ -36,6 +40,7 @@
 .save,
 .clean {
     border: none;
+    border-radius: 5%/1rem;
     color: white;
     cursor: pointer;
     flex: 1;
@@ -75,6 +80,7 @@
 
 .message {
     background: blue;
+    border-radius: 5%/1rem;
     color: white;
     cursor: pointer;
     font: 1rem sans-serif;

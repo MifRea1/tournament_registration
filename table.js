@@ -10,8 +10,36 @@ const inputNames = [
     'title',
     'id_fide'
 ];
+const numberColumns = ['birth_day', 'birth_month', 'birth_year', 'rating', 'id_fide'];
 const columnsCount = inputNames.length + 1;
 const tableContent = document.querySelector('.players tbody');
+const headerClickHandler = event => {
+    const rows = Array.from(tableContent.querySelectorAll('tr:not(:first-child)'));
+    const columnName = inputNames[event.target.cellIndex - 1];
+    const input = 'input[name="' + columnName + '[]' + '"]';
+    const modifier = columnName === 'rating' ? -1 : 1;
+    rows.sort((r1, r2) => {
+        let v1 = r1.querySelector(input).value;
+        let v2 = r2.querySelector(input).value;
+        if (v1 === v2) {
+            return 0;
+        } else if (v1 === '') {
+            return 1;
+        } else if (v2 === '') {
+            return -1;
+        } else if (numberColumns.includes(columnName)) {
+            v1 = Number(v1);
+            v2 = Number(v2);
+        }
+        return (v1 < v2 ? -1 : 1) * modifier;
+    });
+    rows.forEach((row, index) => {
+        row.querySelector('td').innerText = index + 1;
+        tableContent.appendChild(row);
+    });
+};
+Array.from(tableContent.querySelectorAll('tr:first-child > td:not(:first-child)'))
+    .forEach(headerElement => headerElement.addEventListener('click', headerClickHandler));
 const keyboardHandler = event => {
     const code = event.code;
     const target = event.target;
@@ -175,7 +203,7 @@ const addRow = () => {
             const input = document.createElement('input');
             const name = inputNames[columnIndex - 2];
             input.name = name + '[]';
-            if (['birth_day', 'birth_month', 'birth_year', 'rating', 'id_fide'].includes(name)) {
+            if (numberColumns.includes(name)) {
                 input.type = 'number';
                 input.autocomplete = 'off';
                 input.min = 0;
@@ -212,12 +240,12 @@ fetch('http://localhost/saved.json')
         if (response.ok) {
             return response.json();
         }
-        for (let i = 1; i <= defaultPlayersCount; ++i) {
-            addRow();
-        }
     })
     .then(saved => {
         if (!saved) {
+            for (let i = 1; i <= defaultPlayersCount; ++i) {
+                addRow();
+            }
             return;
         }
         const names = inputNames.filter(name => saved.hasOwnProperty(name));
@@ -235,7 +263,12 @@ fetch('http://localhost/saved.json')
             )
         );
     })
-    .catch(() => displayMessage('Не удалось загрузить сохранённые данные с сервера.', 'error'));
+    .catch(() => {
+        displayMessage('Не удалось загрузить сохранённые данные с сервера.', 'error');
+        for (let i = 1; i <= defaultPlayersCount; ++i) {
+            addRow();
+        }
+    });
 
 let localRating = [];
 fetch('http://localhost/local_rating.json')
@@ -252,7 +285,7 @@ fetch('http://localhost/local_rating.json')
             displayMessage('Загружен областной рейтинг-лист.', 'success');
         }
     })
-    .catch(() => displayMessage('Не удалось загрузить рейтинг-лист с сервера.', 'error'));
+    .catch(() => displayMessage('Не удалось загрузить областной рейтинг-лист с сервера.', 'error'));
 let rating = [];
 fetch('http://localhost/rating.csv')
     .then(response => {
@@ -271,7 +304,8 @@ fetch('http://localhost/rating.csv')
             });
             displayMessage('Загружен российский рейтинг-лист.', 'success');
         }
-    });
+    })
+    .catch(() => displayMessage('Не удалось загрузить российский рейтинг-лист с сервера.', 'error'));
 
 const submitHandler = event => {
     event.preventDefault();
