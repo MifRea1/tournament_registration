@@ -32,6 +32,53 @@
     text-align: right;
 }
 
+.tournament-info {
+    display: flex;
+    font: bold .8rem sans-serif;
+    margin: .5rem 0;
+}
+
+.tournament-info .tournament-name,
+.tournament-info .tournament-place,
+.tournament-info .chief-arbiter,
+.tournament-info .tournament-rounds-count {
+    margin: 0 .5rem;
+}
+
+.tournament-info .tournament-name {
+    flex: .42;
+    margin-left: 0;
+}
+
+.tournament-info .tournament-place {
+    flex: .18;
+}
+
+.tournament-info .chief-arbiter {
+    flex: .26;
+}
+
+.tournament-info .tournament-rounds-count {
+    flex: .14;
+    margin-right: 0;
+    width: auto;
+}
+
+#tournament-name,
+#tournament-place,
+#chief-arbiter,
+#tournament-rounds-count {
+    border: 1px dotted;
+    font: .8rem sans-serif;
+    margin: .2em 0 0 0;
+    padding: .15rem;
+    width: 100%;
+}
+
+#tournament-rounds-count {
+    text-align: right;
+}
+
 .buttons {
     display: flex;
     margin: .5rem 0;

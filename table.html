@@ -23,6 +23,24 @@
                 </tr>
             </tbody>
         </table>
+        <div class="tournament-info">
+            <div class="tournament-name">
+                <label for="tournament-name">Название турнира</label>
+                <input type="text" id="tournament-name" name="tournament_name" maxlength="63">
+            </div>
+            <div class="tournament-place">
+                <label for="tournament-place">Место проведения</label>
+                <input type="text" id="tournament-place" name="tournament_place" maxlength="63">
+            </div>
+            <div class="chief-arbiter">
+                <label for="chief-arbiter">Главный судья</label>
+                <input type="text" id="chief-arbiter" name="chief_arbiter" maxlength="63">
+            </div>
+            <div class="tournament-rounds-count">
+                <label for="tournament-rounds-count">Количество туров</label>
+                <input type="number" id="tournament-rounds-count" name="tournament_rounds_count" min="1" max="64" value="9">
+            </div>
+        </div>
         <div class="buttons">
             <button class="save">Сохранить</button>
             <button class="clean">Очистить</button>

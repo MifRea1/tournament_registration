@@ -1,5 +1,5 @@
 (() => {
-const inputNames = [
+const columnNames = [
     'last_name',
     'first_name',
     'birth_day',
@@ -11,11 +11,11 @@ const inputNames = [
     'id_fide'
 ];
 const numberColumns = ['birth_day', 'birth_month', 'birth_year', 'rating', 'id_fide'];
-const columnsCount = inputNames.length + 1;
+const columnsCount = columnNames.length + 1;
 const tableContent = document.querySelector('.players tbody');
 const headerClickHandler = event => {
     const rows = Array.from(tableContent.querySelectorAll('tr:not(:first-child)'));
-    const columnName = inputNames[event.target.cellIndex - 1];
+    const columnName = columnNames[event.target.cellIndex - 1];
     const input = 'input[name="' + columnName + '[]' + '"]';
     const modifier = columnName === 'rating' ? -1 : 1;
     rows.sort((r1, r2) => {
@@ -38,7 +38,7 @@ const headerClickHandler = event => {
         tableContent.appendChild(row);
     });
 };
-Array.from(tableContent.querySelectorAll('tr:first-child > td:not(:first-child)'))
+tableContent.querySelectorAll('tr:first-child > td:not(:first-child)')
     .forEach(headerElement => headerElement.addEventListener('click', headerClickHandler));
 const keyboardHandler = event => {
     const code = event.code;
@@ -201,7 +201,7 @@ const addRow = () => {
         }
         if (columnIndex > 1) {
             const input = document.createElement('input');
-            const name = inputNames[columnIndex - 2];
+            const name = columnNames[columnIndex - 2];
             input.name = name + '[]';
             if (numberColumns.includes(name)) {
                 input.type = 'number';
@@ -248,20 +248,20 @@ fetch('http://localhost/saved.json')
             }
             return;
         }
-        const names = inputNames.filter(name => saved.hasOwnProperty(name));
-        const savedLinesCount = saved[names[0]].length;
+        const savedColumnNames = columnNames.filter(name => saved.hasOwnProperty(name));
+        const savedLinesCount = saved[savedColumnNames[0]].length;
         for (let i = 1; i <= savedLinesCount; ++i) {
             addRow();
         }
-        names.forEach(
-            name => tableContent.querySelectorAll('input[name="' + name + '[]"]').forEach(
-                (node, index) => {
-                    if (saved.hasOwnProperty(name)) {
-                        node.value = saved[name][index];
-                    }
-                }
-            )
-        );
+        savedColumnNames
+            .forEach(name => tableContent.querySelectorAll('input[name="' + name + '[]"]')
+                .forEach((input, index) => input.value = saved[name][index]));
+        document.querySelectorAll('.tournament-info input').forEach(field => {
+            if (saved.hasOwnProperty(field.name)) {
+                field.value = saved[field.name];
+            }
+        });
+
     })
     .catch(() => {
         displayMessage('Не удалось загрузить сохранённые данные с сервера.', 'error');
@@ -324,6 +324,8 @@ const cleanHandler = event => {
     while (tableContent.childElementCount > 1) {
         tableContent.lastElementChild.remove();
     }
+    document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+    document.getElementById('tournament-rounds-count').value = 9;
     for (let i = 1; i <= defaultPlayersCount; ++i) {
         addRow();
     }
