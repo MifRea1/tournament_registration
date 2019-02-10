@@ -15,30 +15,48 @@ const columnsCount = columnNames.length + 1;
 const tableContent = document.querySelector('.players tbody');
 const headerClickHandler = event => {
     const rows = Array.from(tableContent.querySelectorAll('tr:not(:first-child)'));
-    const columnName = columnNames[event.target.cellIndex - 1];
-    const input = 'input[name="' + columnName + '[]' + '"]';
-    const modifier = columnName === 'rating' ? -1 : 1;
-    rows.sort((r1, r2) => {
-        let v1 = r1.querySelector(input).value;
-        let v2 = r2.querySelector(input).value;
-        if (v1 === v2) {
-            return 0;
-        } else if (v1 === '') {
-            return 1;
-        } else if (v2 === '') {
-            return -1;
-        } else if (numberColumns.includes(columnName)) {
-            v1 = Number(v1);
-            v2 = Number(v2);
-        }
-        return (v1 < v2 ? -1 : 1) * modifier;
-    });
+    const columnIndex = event.target.cellIndex;
+    let sortFunction;
+    if (columnIndex === 0) {
+        sortFunction = (r1, r2) => {
+            const r1marked = r1.classList.contains('marked');
+            const r2marked = r2.classList.contains('marked');
+            if (r1marked && !r2marked) {
+                return 1;
+            } else if (!r1marked && r2marked) {
+                return -1;
+            } else {
+                return 0;
+            }
+
+        };
+    } else {
+        const columnName = columnNames[columnIndex - 1];
+        const input = 'input[name="' + columnName + '[]' + '"]';
+        const modifier = columnName === 'rating' ? -1 : 1;
+        sortFunction = (r1, r2) => {
+            let v1 = r1.querySelector(input).value;
+            let v2 = r2.querySelector(input).value;
+            if (v1 === v2) {
+                return 0;
+            } else if (v1 === '') {
+                return 1;
+            } else if (v2 === '') {
+                return -1;
+            } else if (numberColumns.includes(columnName)) {
+                v1 = Number(v1);
+                v2 = Number(v2);
+            }
+            return (v1 < v2 ? -1 : 1) * modifier;
+        };
+    }
+    rows.sort(sortFunction);
     rows.forEach((row, index) => {
         row.querySelector('td').innerText = index + 1;
         tableContent.appendChild(row);
     });
 };
-tableContent.querySelectorAll('tr:first-child > td:not(:first-child)')
+tableContent.querySelectorAll('tr:first-child > td')
     .forEach(headerElement => headerElement.addEventListener('click', headerClickHandler));
 const keyboardHandler = event => {
     const code = event.code;
@@ -92,25 +110,25 @@ const autocompleteSelect = code => {
         if (code.includes('Enter')) {
             return selected.firstChild.click();
         }
-        selected.className = '';
+        selected.classList.remove('selected');
         if (code === 'ArrowDown') {
             if (selected.nextSibling) {
-                selected.nextSibling.className = 'selected';
+                selected.nextSibling.classList.add('selected');
             } else {
-                autocomplete.firstChild.className = 'selected';
+                autocomplete.firstChild.classList.add('selected');
             }
         } else if (code === 'ArrowUp') {
             if (selected.previousSibling) {
-                selected.previousSibling.className = 'selected';
+                selected.previousSibling.classList.add('selected');
             } else {
-                autocomplete.lastChild.className = 'selected';
+                autocomplete.lastChild.classList.add('selected');
             }
         }
     } else {
         if (code === 'ArrowDown') {
-            autocomplete.firstChild.className = 'selected';
+            autocomplete.firstChild.classList.add('selected');
         } else if (code === 'ArrowUp') {
-            autocomplete.lastChild.className = 'selected';
+            autocomplete.lastChild.classList.add('selected');
         }
     }
     autocomplete.querySelector('.selected').scrollIntoViewIfNeeded();
@@ -126,7 +144,10 @@ const messageBoard = document.querySelector('.message-board');
 const displayMessage = (message, type = '') => {
     const messageBox = document.createElement('div');
     messageBox.innerText = message;
-    messageBox.className = ('message ' + type).trimRight();
+    messageBox.classList.add('message');
+    if (type !== '') {
+        messageBox.classList.add(type);
+    }
     messageBox.addEventListener('click', event => event.target.remove());
     messageBoard.appendChild(messageBox);
     setTimeout(() => messageBox.remove(), 5000);
@@ -185,19 +206,31 @@ const autocompleteHandler = event => {
     autocomplete.style.width = currentRow.offsetWidth - target.parentNode.offsetLeft + 'px';
     document.querySelector('body').appendChild(autocomplete);
 };
+const rowTagClickHandler = event => {
+    const classList = event.target.parentNode.classList;
+    if (classList.contains('marked')) {
+        classList.remove('marked');
+    } else {
+        classList.add('marked');
+    }
+};
 const defaultPlayersCount = 10;
 const maxPlayersCount = 300;
 const currentYear = new Date().getFullYear();
 const addRow = () => {
-    const rowsCount = tableContent.querySelectorAll('tr').length;
-    if (rowsCount > maxPlayersCount) {
+    const rowIndex = tableContent.querySelectorAll('tr').length;
+    if (rowIndex > maxPlayersCount) {
         return;
     }
     const row = document.createElement('tr');
+    if (markedRows.includes(rowIndex)) {
+        row.classList.add('marked');
+    }
     for (let columnIndex = 1; columnIndex <= columnsCount; ++columnIndex) {
         const cell = document.createElement('td');
         if (columnIndex === 1) {
-            cell.textContent = rowsCount;
+            cell.textContent = rowIndex;
+            cell.addEventListener('click', rowTagClickHandler);
         }
         if (columnIndex > 1) {
             const input = document.createElement('input');
@@ -235,6 +268,7 @@ const addRow = () => {
     tableContent.appendChild(row);
 };
 
+let markedRows = [];
 fetch('http://localhost/saved.json')
     .then(response => {
         if (response.ok) {
@@ -247,6 +281,9 @@ fetch('http://localhost/saved.json')
                 addRow();
             }
             return;
+        }
+        if (saved.hasOwnProperty('marked')) {
+            markedRows = saved.marked.split(',').map(Number);
         }
         const savedColumnNames = columnNames.filter(name => saved.hasOwnProperty(name));
         const savedLinesCount = saved[savedColumnNames[0]].length;
@@ -310,6 +347,7 @@ fetch('http://localhost/rating.csv')
 const submitHandler = event => {
     event.preventDefault();
     const data = new FormData(event.target);
+    data.append('marked', Array.from(tableContent.querySelectorAll('tr.marked > td:first-child')).map(td => td.innerText).join(','));
     fetch('http://localhost', {
         body: data,
         method: 'POST'
@@ -321,6 +359,8 @@ const submitHandler = event => {
 document.querySelector('form').addEventListener('submit', submitHandler);
 const cleanHandler = event => {
     event.preventDefault();
+    removeAutocomplete();
+    markedRows = [];
     while (tableContent.childElementCount > 1) {
         tableContent.lastElementChild.remove();
     }

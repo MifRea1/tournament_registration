@@ -3,8 +3,14 @@
     width: 100%;
 }
 
-.players tr:first-child > td:not(:first-child) {
+.players tr:first-child {
     cursor: pointer;
+}
+
+.players tr.marked,
+.players tr.marked input {
+    background: gray;
+    color: white;
 }
 
 .players td {
@@ -14,6 +20,7 @@
 }
 
 .players td:first-child {
+    cursor: pointer;
     text-align: right;
 }
 
@@ -103,6 +110,7 @@
 
 .save {
     background: green;
+    box-shadow: 0 0 .2rem green;
 }
 
 .save:active {
@@ -111,6 +119,7 @@
 
 .clean {
     background: darkred;
+    box-shadow: 0 0 .2rem darkred;
 }
 
 .clean:active {
@@ -118,7 +127,6 @@
 }
 
 .message-board {
-    background: white;
     position: fixed;
     right: 0;
     top: 0;
@@ -128,6 +136,7 @@
 .message {
     background: blue;
     border-radius: 5%/1rem;
+    box-shadow: 0 0 .5rem white;
     color: white;
     cursor: pointer;
     font: 1rem sans-serif;
