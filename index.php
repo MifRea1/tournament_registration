@@ -8,11 +8,13 @@ if ($_POST) {
     file_put_contents('saved.json', json_encode($_POST));
     echo 'Данные сохранены на сервере.';
 } else {
-    return header('Location: table.html');
+    header('Location: table.html');
+    echo "\n";
+    exit;
 }
 
 if (!file_exists('saved.json')) {
-    return;
+    exit;
 }
 
 $json = file_get_contents('saved.json');
