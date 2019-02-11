@@ -14,26 +14,31 @@ const numberColumns = ['birth_day', 'birth_month', 'birth_year', 'rating', 'id_f
 const columnsCount = columnNames.length + 1;
 const tableContent = document.querySelector('.players tbody');
 const headerClickHandler = event => {
-    const rows = Array.from(tableContent.querySelectorAll('tr:not(:first-child)'));
-    const columnIndex = event.target.cellIndex;
+    const headerElement = event.target;
+    const classList = headerElement.classList;
+    const columnIndex = headerElement.cellIndex;
+    let defaultSorting = 'ascending';
+    let modifier = classList.contains(defaultSorting) ? -1 : 1;
     let sortFunction;
     if (columnIndex === 0) {
         sortFunction = (r1, r2) => {
             const r1marked = r1.classList.contains('marked');
             const r2marked = r2.classList.contains('marked');
+            let result = 0;
             if (r1marked && !r2marked) {
-                return 1;
+                result = 1;
             } else if (!r1marked && r2marked) {
-                return -1;
-            } else {
-                return 0;
+                result = -1;
             }
-
+            return result * modifier;
         };
     } else {
         const columnName = columnNames[columnIndex - 1];
         const input = 'input[name="' + columnName + '[]' + '"]';
-        const modifier = columnName === 'rating' ? -1 : 1;
+        if (columnName === 'rating') {
+            defaultSorting = 'descending';
+            modifier = classList.contains(defaultSorting) ? 1 : -1;
+        }
         sortFunction = (r1, r2) => {
             let v1 = r1.querySelector(input).value;
             let v2 = r2.querySelector(input).value;
@@ -50,11 +55,19 @@ const headerClickHandler = event => {
             return (v1 < v2 ? -1 : 1) * modifier;
         };
     }
+    const rows = Array.from(tableContent.querySelectorAll('tr:not(:first-child)'));
     rows.sort(sortFunction);
     rows.forEach((row, index) => {
         row.querySelector('td').innerText = index + 1;
         tableContent.appendChild(row);
     });
+    if (classList.contains('descending')) {
+        classList.replace('descending', 'ascending');
+    } else if (classList.contains('ascending')) {
+        classList.replace('ascending', 'descending');
+    } else {
+        classList.add(defaultSorting);
+    }
 };
 tableContent.querySelectorAll('tr:first-child > td')
     .forEach(headerElement => headerElement.addEventListener('click', headerClickHandler));
