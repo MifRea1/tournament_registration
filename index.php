@@ -5,19 +5,23 @@ require_once('is_female.php');
 const COUNTRY = 'RUS';
 
 if ($_POST) {
-    file_put_contents('saved.json', json_encode($_POST));
+    if (empty($_POST['filename'])) {
+        exit;
+    }
+    $filename = $_POST['filename'];
+    unset($_POST['filename']);
+    file_put_contents($filename . '.json', json_encode($_POST));
     echo 'Данные сохранены на сервере.';
 } else {
-    header('Location: table.html');
-    echo "\n";
+    require('index.phtml');
     exit;
 }
 
-if (!file_exists('saved.json')) {
+if (!file_exists($filename . '.json')) {
     exit;
 }
 
-$json = file_get_contents('saved.json');
+$json = file_get_contents($filename . '.json');
 $data = json_decode($json);
 $tournamentFile = fopen(date('ymd') . '.smw', 'w');
 $playersCount = count($data->last_name); // 0-300

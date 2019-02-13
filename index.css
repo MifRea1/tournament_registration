@@ -1,0 +1,24 @@
+.tournament {
+    border: 1px dotted;
+    display: flex;
+    font: 2rem serif;
+}
+
+.tournament > a,
+.tournament > input,
+.tournament > span {
+    flex: .5;
+    padding: .5rem;
+}
+
+.tournament > a {
+    text-decoration: none;
+}
+
+.tournament > input {
+    font: 2rem serif;
+}
+
+.tournament > span {
+    text-align: right;
+}

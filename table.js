@@ -282,7 +282,7 @@ const addRow = () => {
 };
 
 let markedRows = [];
-fetch('http://localhost/saved.json')
+const loadSavedFile = filename => fetch('http://localhost/' + filename + '.json')
     .then(response => {
         if (response.ok) {
             return response.json();
@@ -319,6 +319,15 @@ fetch('http://localhost/saved.json')
             addRow();
         }
     });
+const parameters = location.search.slice(1).split('&');
+const savedFilenameParameter = parameters.map(parameter => parameter.split('=')).find(parameter => parameter[0] === 'name');
+if (savedFilenameParameter) {
+    loadSavedFile(savedFilenameParameter[1]);
+} else {
+    for (let i = 1; i <= defaultPlayersCount; ++i) {
+        addRow();
+    }
+}
 
 let localRating = [];
 fetch('http://localhost/local_rating.json')
@@ -361,6 +370,9 @@ const submitHandler = event => {
     event.preventDefault();
     const data = new FormData(event.target);
     data.append('marked', Array.from(tableContent.querySelectorAll('tr.marked > td:first-child')).map(td => td.innerText).join(','));
+    if (savedFilenameParameter) {
+        data.append('filename', savedFilenameParameter[1]);
+    }
     fetch('http://localhost', {
         body: data,
         method: 'POST'

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список турниров</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+<?php
+echo '<span class="tournament">';
+$date = date('ymd');
+echo '<a href="table.html?name=' . $date . '">Создать новый турнир</a>';
+echo '<input type="text" name="filename" value="' . $date . '" maxlength="26">';
+echo '</span>';
+$tournaments = [];
+$directory = opendir('.');
+while ($filename = readdir($directory)) {
+    if (substr($filename, -4) === 'json' && substr($filename, 0, 12) !== 'local_rating') {
+        $tournaments[] = $filename;
+    }
+}
+closedir($directory);
+$tournaments = array_map(function ($filename) {
+    return [substr($filename, 0, -5), filemtime($filename)];
+}, $tournaments);
+usort($tournaments, function ($s1, $s2) {
+    return $s1[1] > $s2[1] ? -1 : 1;
+});
+array_walk($tournaments, function ($filedata) {
+    list($name, $time) = $filedata;
+    echo '<span class="tournament">';
+    echo '<a href="table.html?name=', $name, '">', $name, '</a>';
+    echo '<span>', date('H:i d.m.Y', $time), '</span>';
+    echo '</span>';
+});
+?>
+    <script type="text/javascript" src="index.js"></script>
+</body>
+</html>
