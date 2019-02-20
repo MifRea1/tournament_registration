@@ -71,6 +71,8 @@ const headerClickHandler = event => {
 };
 tableContent.querySelectorAll('tr:first-child > td')
     .forEach(headerElement => headerElement.addEventListener('click', headerClickHandler));
+const updateRowNumbers = () => tableContent.querySelectorAll('tr:not(:first-child) > td:first-child')
+    .forEach((cell, index) => cell.textContent = index + 1);
 const keyboardHandler = event => {
     const code = event.code;
     const target = event.target;
@@ -107,8 +109,7 @@ const keyboardHandler = event => {
             return;
         }
         tableContent.removeChild(row);
-        Array.from(tableContent.querySelectorAll('tr:not(:first-of-type) > td:first-of-type'))
-            .forEach((cell, index) => cell.textContent = index + 1);
+        updateRowNumbers();
     } else if (code === 'Escape') {
         removeAutocomplete();
     }
@@ -144,7 +145,9 @@ const autocompleteSelect = code => {
             autocomplete.lastChild.classList.add('selected');
         }
     }
-    autocomplete.querySelector('.selected').scrollIntoViewIfNeeded();
+    if (autocomplete.querySelector('.selected')) {
+        autocomplete.querySelector('.selected').scrollIntoViewIfNeeded();
+    }
 };
 let currentRow;
 const removeAutocomplete = () => {
@@ -219,14 +222,6 @@ const autocompleteHandler = event => {
     autocomplete.style.width = currentRow.offsetWidth - target.parentNode.offsetLeft + 'px';
     document.querySelector('body').appendChild(autocomplete);
 };
-const rowTagClickHandler = event => {
-    const classList = event.target.parentNode.classList;
-    if (classList.contains('marked')) {
-        classList.remove('marked');
-    } else {
-        classList.add('marked');
-    }
-};
 const defaultPlayersCount = 10;
 const maxPlayersCount = 300;
 const currentYear = new Date().getFullYear();
@@ -243,7 +238,7 @@ const addRow = () => {
         const cell = document.createElement('td');
         if (columnIndex === 1) {
             cell.textContent = rowIndex;
-            cell.addEventListener('click', rowTagClickHandler);
+            cell.addEventListener('click', event => event.target.parentNode.classList.toggle('marked'));
         }
         if (columnIndex > 1) {
             const input = document.createElement('input');
@@ -396,4 +391,18 @@ const cleanHandler = event => {
     }
 };
 document.querySelector('.clean').addEventListener('click', cleanHandler);
+const invertSelectionHandler = event => {
+    event.preventDefault();
+    tableContent.querySelectorAll('tr:not(:first-child)').forEach(row => row.classList.toggle('marked'));
+};
+document.querySelector('.invert-selection').addEventListener('click', invertSelectionHandler);
+const deleteSelectedHandler = event => {
+    event.preventDefault();
+    tableContent.querySelectorAll('tr.marked').forEach(row => row.remove());
+    updateRowNumbers();
+    if (!tableContent.querySelector('tr:not(:first-child)')) {
+        addRow();
+    }
+};
+document.querySelector('.delete-selected').addEventListener('click', deleteSelectedHandler);
 })();

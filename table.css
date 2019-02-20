@@ -88,29 +88,48 @@
 
 .buttons {
     display: flex;
+    flex-wrap: wrap;
     margin: .5rem 0;
 }
 
-.save,
-.clean {
+.buttons > button {
     border: none;
     border-radius: 5%/1rem;
     color: white;
     cursor: pointer;
-    flex: 1;
-    font: 1rem sans-serif;
-    margin: 0 10%;
+    flex: 30%;
+    font: bold 1rem sans-serif;
+    margin: .5rem 10%;
+    outline: none;
     padding: .5rem;
 }
 
-.save:hover,
-.clean:hover {
-    font-weight: bold;
+button.invert-selection,
+button.delete-selected {
+    background: white;
+    box-shadow: 0 0 .2rem gray;
+    color: gray;
+}
+
+.invert-selection:hover {
+    background: gray;
+    box-shadow: 0 0 1rem gray;
+    color: white;
+}
+
+.delete-selected:hover {
+    background: pink;
+    box-shadow: 0 0 1rem red;
+    color: darkred;
 }
 
 .save {
     background: green;
     box-shadow: 0 0 .2rem green;
+}
+
+.save:hover {
+    box-shadow: 0 0 1rem green;
 }
 
 .save:active {
@@ -120,6 +139,10 @@
 .clean {
     background: darkred;
     box-shadow: 0 0 .2rem darkred;
+}
+
+.clean:hover {
+    box-shadow: 0 0 1rem darkred;
 }
 
 .clean:active {
