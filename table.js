@@ -354,7 +354,13 @@ fetch('http://localhost/rating.csv')
             rating = csv.split('\r\n').map(line => {
                 const values = line.split(';'); // id name title rating year flags
                 const title = values[2] !== '' ? values[2].toUpperCase().replace('M', 'I') + 'M' : '';
-                return values[1].split(', ').concat('', '', values[4], '', values[3], title, values[0]);
+                let name = values[1].split(/\s?[,\s]\s?/);
+                if (name.length > 2) {
+                    name = [name[0], name.slice(1).join(' ').trimEnd()];
+                } else if (name.length === 1) {
+                    name[1] = '';
+                }
+                return name.concat('', '', values[4], '', values[3], title, values[0]);
             });
             displayMessage('Загружен российский рейтинг-лист.', 'success');
         }
