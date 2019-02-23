@@ -1,4 +1,3 @@
-*.csv
-*.json
-*.smw
-*.smw.bak
+ratings
+saves
+smw

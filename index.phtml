@@ -7,21 +7,22 @@
 </head>
 <body>
 <?php
-echo '<span class="tournament">';
+date_default_timezone_set('Europe/Ulyanovsk');
 $date = date('ymd');
+echo '<span class="tournament">';
 echo '<a href="table.html?name=' . $date . '">Создать новый турнир</a>';
 echo '<input type="text" name="filename" value="' . $date . '" maxlength="26">';
 echo '</span>';
 $tournaments = [];
-$directory = opendir('.');
+$directory = opendir('saves');
 while ($filename = readdir($directory)) {
-    if (substr($filename, -4) === 'json' && substr($filename, 0, 12) !== 'local_rating') {
+    if (substr($filename, -4) === 'json') {
         $tournaments[] = $filename;
     }
 }
 closedir($directory);
 $tournaments = array_map(function ($filename) {
-    return [substr($filename, 0, -5), filemtime($filename)];
+    return [substr($filename, 0, -5), filemtime('saves' . DIRECTORY_SEPARATOR . $filename)];
 }, $tournaments);
 usort($tournaments, function ($s1, $s2) {
     return $s1[1] > $s2[1] ? -1 : 1;

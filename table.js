@@ -277,7 +277,9 @@ const addRow = () => {
 };
 
 let markedRows = [];
-const loadSavedFile = filename => fetch('http://localhost/' + filename + '.json')
+const baseUrl = 'http://localhost/';
+const savesPath = baseUrl + 'saves/';
+const loadSavedFile = filename => fetch(savesPath + filename + '.json')
     .then(response => {
         if (response.ok) {
             return response.json();
@@ -325,7 +327,8 @@ if (savedFilenameParameter) {
 }
 
 let localRating = [];
-fetch('http://localhost/local_rating.json')
+const ratingsPath = baseUrl + 'ratings/';
+fetch(ratingsPath + 'local_rating.json')
     .then(response => {
         if (response.ok) {
             return response.json();
@@ -341,7 +344,7 @@ fetch('http://localhost/local_rating.json')
     })
     .catch(() => displayMessage('Не удалось загрузить областной рейтинг-лист с сервера.', 'error'));
 let rating = [];
-fetch('http://localhost/rating.csv')
+fetch(ratingsPath + 'rating.csv')
     .then(response => {
         if (response.ok) {
             return response.text();
@@ -374,7 +377,7 @@ const submitHandler = event => {
     if (savedFilenameParameter) {
         data.append('filename', savedFilenameParameter[1]);
     }
-    fetch('http://localhost', {
+    fetch(baseUrl, {
         body: data,
         method: 'POST'
     })

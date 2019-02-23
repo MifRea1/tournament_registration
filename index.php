@@ -3,6 +3,8 @@
 require_once('is_female.php');
 
 const COUNTRY = 'RUS';
+const SAVES_PATH = 'saves' . DIRECTORY_SEPARATOR;
+const SMW_PATH = 'smw' . DIRECTORY_SEPARATOR;
 
 if ($_POST) {
     if (empty($_POST['filename'])) {
@@ -10,20 +12,20 @@ if ($_POST) {
     }
     $filename = $_POST['filename'];
     unset($_POST['filename']);
-    file_put_contents($filename . '.json', json_encode($_POST));
+    file_put_contents(SAVES_PATH . $filename . '.json', json_encode($_POST));
     echo 'Данные сохранены на сервере.';
 } else {
     require('index.phtml');
     exit;
 }
 
-if (!file_exists($filename . '.json')) {
+if (!file_exists(SAVES_PATH . $filename . '.json')) {
     exit;
 }
 
-$json = file_get_contents($filename . '.json');
+$json = file_get_contents(SAVES_PATH . $filename . '.json');
 $data = json_decode($json);
-$tournamentFile = fopen(date('ymd') . '.smw', 'w');
+$tournamentFile = fopen(SMW_PATH . $filename . '.smw', 'w');
 $playersCount = count($data->last_name); // 0-300
 $roundsCount = (int) $data->tournament_rounds_count; // 1-64
 if ($roundsCount < 1 || $roundsCount > 64) {
